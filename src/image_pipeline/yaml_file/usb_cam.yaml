@@ -1,0 +1,20 @@
+image_width: 640
+image_height: 480
+camera_name: usb_cam
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [290.0267501714509, 0, 322.6325993667504, 0, 292.149077097319, 227.4129755127294, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.2316686664052343, 0.03130479713741277, 0.001028344089742923, 0.002892320592218659, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [209.2358856201172, 0, 316.863209585661, 0, 0, 228.3725433349609, 219.246416482707, 0, 0, 0, 1, 0]
