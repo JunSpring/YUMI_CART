@@ -8,22 +8,6 @@ from sensor_msgs.msg import CompressedImage
 from lane_detection.msg import detected_msg
 from cv_bridge import CvBridge
 
-cv2.namedWindow("W", cv2.WINDOW_NORMAL)
-cv2.createTrackbar("Hl", "W", 0, 255, lambda x:x)
-cv2.createTrackbar("Sl", "W", 0, 255, lambda x:x)
-cv2.createTrackbar("Vl", "W", 224, 255, lambda x:x) #135
-cv2.createTrackbar("Hh", "W", 255, 255, lambda x:x)
-cv2.createTrackbar("Sh", "W", 22, 255, lambda x:x)
-cv2.createTrackbar("Vh", "W", 250, 255, lambda x:x)
-
-cv2.namedWindow("Y", cv2.WINDOW_NORMAL)
-cv2.createTrackbar("Hl", "Y", 20, 255, lambda x:x)
-cv2.createTrackbar("Sl", "Y", 100, 255, lambda x:x)
-cv2.createTrackbar("Vl", "Y", 100, 255, lambda x:x)
-cv2.createTrackbar("Hh", "Y", 30, 255, lambda x:x)
-cv2.createTrackbar("Sh", "Y", 255, 255, lambda x:x)
-cv2.createTrackbar("Vh", "Y", 255, 255, lambda x:x)
-
 Width = 640
 Height = 480
 
@@ -70,7 +54,7 @@ class CameraReceiver():
     state = -1
     def __init__(self):
         rospy.loginfo("Camera Receiver Object is Created")
-        rospy.Subscriber("/usb_cam/image_rect_color/compressed", CompressedImage, self.Callback)
+        rospy.Subscriber("/camera2/usb_cam2/image_rect_color/compressed", CompressedImage, self.Callback)
         rospy.Subscriber("/whatLane", Int32, self.state_Callback)
         self.pub = rospy.Publisher("/lane_pub", detected_msg, queue_size = 10)
 
@@ -124,37 +108,16 @@ def warp_process_image(state, img):
 
     blur = cv2.GaussianBlur(img,(5, 5), 0) 
     hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
-   
-    Hl_w = cv2.getTrackbarPos("Hl", "W")
-    Sl_w = cv2.getTrackbarPos("Sl", "W")
-    Vl_w = cv2.getTrackbarPos("Vl", "W")
-    Hh_w = cv2.getTrackbarPos("Hh", "W")
-    Sh_w = cv2.getTrackbarPos("Sh", "W")
-    Vh_w = cv2.getTrackbarPos("Vh", "W")
 
-    Hl_y = cv2.getTrackbarPos("Hl", "Y")
-    Sl_y = cv2.getTrackbarPos("Sl", "Y")
-    Vl_y = cv2.getTrackbarPos("Vl", "Y")
-    Hh_y = cv2.getTrackbarPos("Hh", "Y")
-    Sh_y = cv2.getTrackbarPos("Sh", "Y")
-    Vh_y = cv2.getTrackbarPos("Vh", "Y")
+    lower_white = np.array([0, 0, 180])
+    upper_white = np.array([180, 255, 255])
 
-    lower_white = np.array([Hl_w, Sl_w, Vl_w])
-    upper_white = np.array([Hh_w, Sh_w, Vh_w])
+    lane = cv2.inRange(hsv, lower_white, upper_white)
 
-    lower_yellow = np.array([Hl_y, Sl_y, Vl_y])
-    upper_yellow = np.array([Hh_y, Sh_y, Vh_y])
-
-    lane_white = cv2.inRange(hsv, lower_white, upper_white)
-    lane_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-    lane = cv2.addWeighted(lane_white, 1, lane_yellow, 1, 0) 
-
-    cv2.imshow("W", lane_white)
-    cv2.imshow("Y", lane_yellow)
+    cv2.imshow("W", lane)
    
     cv2.waitKey(1)
 
-    
     histogram = np.sum(lane[lane.shape[0]//2:,:], axis=0) 
     midpoint = np.int(histogram.shape[0]/2) 
     leftx_current = np.argmax(histogram[:midpoint]) 
