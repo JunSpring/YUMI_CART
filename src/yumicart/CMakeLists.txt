@@ -157,12 +157,17 @@ include_directories(
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-# Mark executable scripts (Python etc.) for installation
-# in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-  src/ui.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# # Mark executable scripts (Python etc.) for installation
+# # in contrast to setup.py, you can choose the destination
+# catkin_install_python(PROGRAMS
+#   src/center.py
+#   src/control.py
+#   src/functions.py
+#   src/mode_number.py
+#   src/point_cloud.py
+#   src/ui.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
