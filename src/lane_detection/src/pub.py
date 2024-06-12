@@ -55,12 +55,7 @@ class CameraReceiver():
     def __init__(self):
         rospy.loginfo("Camera Receiver Object is Created")
         rospy.Subscriber("/camera2/usb_cam2/image_rect_color/compressed", CompressedImage, self.Callback)
-        rospy.Subscriber("/whatLane", Int32, self.state_Callback)
         self.pub = rospy.Publisher("/lane_pub", detected_msg, queue_size = 10)
-
-    def state_Callback(self, msg):
-        self.state = msg.data
-        print("1차로" if (self.state==-1) else "2차로")
 
     def Callback(self, data):
         global Width, Height, cap
@@ -68,9 +63,8 @@ class CameraReceiver():
         bridge=CvBridge()
         image=bridge.compressed_imgmsg_to_cv2(data,"bgr8")
 
-        state = self.state
         warp_img, M, Minv = warp_image(image, warp_src, warp_dist, (warp_img_w, warp_img_h))
-        left_fit, right_fit, avex, avey, leftx_current, lefty, rightx_current, righty = warp_process_image(state, warp_img)
+        left_fit, right_fit, avex, avey, leftx_current, lefty, rightx_current, righty = warp_process_image(warp_img)
         lane_img = draw_lane(image, warp_img, Minv, left_fit, right_fit, avex, avey, leftx_current, lefty, rightx_current, righty)
         msg = detected_msg()
         msg.xdetected = avex
@@ -100,7 +94,7 @@ def warp_image(img, src, dst, size):
 
     return warp_img, M, Minv
 
-def warp_process_image(state, img):
+def warp_process_image(img):
     global nwindows 
     global margin 
     global minpix 
@@ -155,17 +149,13 @@ def warp_process_image(state, img):
         right_lane_inds.append(good_right_inds)
         lefty = 0
 
-        if len(good_left_inds) > minpix and state == -1:# 왼쪽 주행 중
+        if len(good_left_inds) > minpix:
             leftx_current = np.int(np.mean(nz[1][good_left_inds])) 
-            lefty = np.int(np.mean(nz[0][good_left_inds])) 
-            rightx_current = leftx_current + 90
-            righty = lefty
+            lefty = np.int(np.mean(nz[0][good_left_inds]))
 
-        if len(good_right_inds) > minpix and state == 1: # 오른쪽 주행 중 
+        if len(good_right_inds) > minpix:
             rightx_current = np.int(np.mean(nz[1][good_right_inds])) 
             righty = np.int(np.mean(nz[0][good_right_inds]))
-            leftx_current = rightx_current - 80 
-            lefty = righty
 
 
         lx.append(leftx_current) 

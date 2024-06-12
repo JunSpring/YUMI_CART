@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<node name="scale_car_yolov5" pkg="scale_car_yolov5" type="ros_detect.py" output="screen">
+		<param name="source" value="/camera1/usb_cam1/image_raw" />
+		<param name="weights" value="$(find scale_car_yolov5)/src/yolov5/best_yolov5s_240412.pt" />
+		<param name="data" value="$(find scale_car_yolov5)/src/yolov5/data/yumi_cart.yaml" />
+		<param name="device" value="cpu" />
+	</node>
+</launch>

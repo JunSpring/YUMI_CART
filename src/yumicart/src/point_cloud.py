@@ -23,7 +23,8 @@ class rpScanReceiver:
         for i, range in enumerate(data.ranges):
             x, y = calc_axis_xy(min_angle + angle_increment * i, range, min_range, max_range)
             if [x, y] != [0, 0]:
-                PC_data.points.append(Point32(x, y, 1))
+                if -4.0 <= x <= 0.0 and -1.5 <= y <= 0.5:
+                    PC_data.points.append(Point32(x, y, 0))
         self.pc_pub.publish(PC_data)
 
 def calc_axis_xy(_theta, _distance, _min_range, _max_range):
