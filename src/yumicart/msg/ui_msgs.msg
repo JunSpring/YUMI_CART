@@ -1,0 +1,2 @@
+uint16 drive_mode
+uint16 product_number

@@ -8,7 +8,7 @@ import math
 from functions import calc_distance
 
 # Enum Import 
-from mode_number import ModeNum
+from enums import DriveModeNum
 
 # Publisher msg Import 
 from yumicart.msg import center_msgs
@@ -17,6 +17,7 @@ from yumicart.msg import center_msgs
 from obstacle_detector.msg  import Obstacles
 from scale_car_yolov5.msg   import Objects, Yolo_Objects
 from fiducial_msgs.msg      import FiducialTransformArray, FiducialTransform
+from yumicart.msg           import ui_msgs
 
 
 # Class Center
@@ -32,7 +33,7 @@ class Center():
         rospy.Subscriber('/raw_obstacles',          Obstacles,              self.raw_obstacles_callback)
         rospy.Subscriber('/yolo',                   Yolo_Objects,           self.yolo_callback)
         rospy.Subscriber("/fiducial_transforms",    FiducialTransformArray, self.fiducial_transforms_callback)
-        # rospy.Subscriber("/ui",                     detected_msg,           self.ui_callback)
+        rospy.Subscriber("/ui",                     ui_msgs,                self.ui_callback)
 
         # Variables Declaration and Initialization
         # raw_obstacles variables
@@ -42,8 +43,9 @@ class Center():
         self.fiducial_id        = -1
         self.fiducial_z         = 0.0
         # ui variables
-        # process variables
         self.drive_mode         = 0
+        self.product_num        = 0
+        # process variables
         self.steering_angle     = 0.0
         self.speed              = 2.5
         
@@ -81,20 +83,23 @@ class Center():
         else:
             self.fiducial_id    = -1
             self.fiducial_z     = 0.0
-        rospy.loginfo(f'{self.fiducial_id}')
-        rospy.loginfo(f'{self.fiducial_z}')
+        # rospy.loginfo(f'{self.fiducial_id}')
+        # rospy.loginfo(f'{self.fiducial_z}')
 
     # /ui Callback Function
     def ui_callback(self, msg):
-        pass
+        self.drive_mode = msg.drive_mode
+        self.product_num = msg.product_number
+        # rospy.loginfo(f'{self.drive_mode}')
+        # rospy.loginfo(f'{self.product_num}')
 
     # Process Function
     def process(self):
         temp = center_msgs()
         if self.fiducial_id == 4 and self.fiducial_z < 1.0 or self.min_dist_obstacle < 1.0:
-            temp.drive_mode = ModeNum.STOP
+            temp.drive_mode = DriveModeNum.STOP
         else:
-            temp.drive_mode = ModeNum.FOLLOWING
+            temp.drive_mode = DriveModeNum.FOLLOWING
         self.center_pub.publish(temp)
 
 def run():

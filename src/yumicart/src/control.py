@@ -6,7 +6,7 @@ import rospy
 import math
 
 # Enum Import 
-from mode_number import ModeNum
+from enums import DriveModeNum
 
 # Publisher msg Import 
 from ackermann_msgs.msg import AckermannDriveStamped
@@ -33,10 +33,10 @@ class Control():
         # lane_pub variables
         self.lane_x             = 0.0
         self.lane_y             = 0.0
-        self.steering_angle = 0.0
-        self.speed          = 2.5
+        self.steering_angle     = 0.0
+        self.speed              = 2.5
         # center variables
-        self.drive_mode     = 0
+        self.drive_mode         = 0
         
         # ROS
         rate = rospy.Rate(10) # 10Hz
@@ -54,7 +54,7 @@ class Control():
         # rospy.loginfo(f'{self.lane_y}')
     # /center Callback Function
     def center_callback(self, msg):
-        self.drive_mode     = msg.drive_mode
+        self.drive_mode = msg.drive_mode
 
     # Process Function
     def process(self):
@@ -62,10 +62,10 @@ class Control():
         publish_data.header.stamp     = rospy.Time.now()
         publish_data.header.frame_id  = 'base_link'
 
-        if self.drive_mode == ModeNum.FOLLOWING:
+        if self.drive_mode == DriveModeNu.FOLLOWING:
             publish_data.drive.steering_angle  = self.steering_angle
             publish_data.drive.speed           = self.speed * 0.25
-            if self.drive_mode == ModeNum.STOP:
+            if self.drive_mode == DriveModeNu.STOP:
                 publish_data.drive.speed = 0.0
 
         self.control_pub.publish(publish_data)
