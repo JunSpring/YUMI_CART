@@ -8,7 +8,7 @@ import math
 from functions import calc_distance
 
 # Enum Import 
-from enums import DriveModeNum
+from enums import DriveModeNum, ProductNum
 
 # Publisher msg Import 
 from yumicart.msg import center_msgs
@@ -31,7 +31,7 @@ class Center():
 
         # Subscriber Declaration
         rospy.Subscriber('/raw_obstacles',          Obstacles,              self.raw_obstacles_callback)
-        rospy.Subscriber('/yolo',                   Yolo_Objects,           self.yolo_callback)
+        rospy.Subscriber('/yolov5_pub',             Yolo_Objects,           self.yolo_callback)
         rospy.Subscriber("/fiducial_transforms",    FiducialTransformArray, self.fiducial_transforms_callback)
         rospy.Subscriber("/ui",                     ui_msgs,                self.ui_callback)
 
@@ -39,6 +39,7 @@ class Center():
         # raw_obstacles variables
         self.min_dist_obstacle  = 0.0
         # yolo variables
+        self.products = []
         # fiducial variables
         self.fiducial_id        = -1
         self.fiducial_z         = 0.0
@@ -73,7 +74,10 @@ class Center():
 
     # /yolo Callback Function
     def yolo_callback(self, msg):
-        pass
+        self.products.clear()
+        for yolo_object in msg.yolo_objects:
+            self.products.append(yolo_object.c)
+        # print(self.products)
 
     # /fiducial_transforms Callback Function
     def fiducial_transforms_callback(self, msg):

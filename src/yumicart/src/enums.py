@@ -7,4 +7,7 @@ class DriveModeNum(IntEnum):
     PAYMENT     = 3
 
 class ProductNum(IntEnum):
-    pass
+    BRAVO = 0
+    CHAMKKAERAMEN = 1
+    CHAPSSALHOTTEONGMIX = 2
+    CHOCOBI = 3

@@ -1,2 +1,2 @@
-uint16 drive_mode
-uint16 product_number
+int16 drive_mode
+int16 product_number

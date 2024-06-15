@@ -94,6 +94,8 @@ class YoloV5_ROS():
                 if len(det):
                     det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0s.shape).round()
 
+                msg = Yolo_Objects()
+
                 for *xyxy, conf, cls in reversed(det):
                     c = int(cls)
                     label = None if self.hide_labels else (self.names[c] if self.hide_conf else f'{self.names[c]} {conf:.2f}')
@@ -105,9 +107,9 @@ class YoloV5_ROS():
                     area = (x2 - x1) * (y2 - y1)
                     total_area += area
 
-                    msg = Yolo_Objects()
+                    
                     msg.yolo_objects.append(Objects(c, x1, x2, y1, y2))
-                    self.pub.publish(msg)
+                self.pub.publish(msg)
 
             self.count_pub.publish(car_count)
             self.count_pub.publish(car_count)  
