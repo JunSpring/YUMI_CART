@@ -1,0 +1,8 @@
+names:
+- bravo
+- chamkkae_ramen
+- chapssal_hotteong_mix
+- chocobi
+nc: 4
+train: /content/mount/MyDrive/Colab Notebooks/yumi_cart/yolov5/train.txt
+val: /content/mount/MyDrive/Colab Notebooks/yumi_cart/yolov5/val.txt

@@ -1,0 +1,9 @@
+names:
+- bravo
+- chakkae_ramen
+- matdongsan
+- chocobi
+- chapssal_hotteong_mix
+nc: 5
+train: /media/wego/SSD/BagImages/train_data/images/train_list.txt
+val: /media/wego/SSD/BagImages/train_data/images/val_list.txt
