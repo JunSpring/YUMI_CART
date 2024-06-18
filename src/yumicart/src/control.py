@@ -62,11 +62,12 @@ class Control():
         publish_data.header.stamp     = rospy.Time.now()
         publish_data.header.frame_id  = 'base_link'
 
-        if self.drive_mode == DriveModeNu.FOLLOWING:
+        if self.drive_mode == DriveModeNum.FOLLOWING or\
+           self.drive_mode == DriveModeNum.SEARCHING:
             publish_data.drive.steering_angle  = self.steering_angle
             publish_data.drive.speed           = self.speed * 0.25
-            if self.drive_mode == DriveModeNu.STOP:
-                publish_data.drive.speed = 0.0
+        if self.drive_mode == DriveModeNum.STOP:
+            publish_data.drive.speed = 0.0
 
         self.control_pub.publish(publish_data)
 

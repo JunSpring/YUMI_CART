@@ -59,6 +59,7 @@ class Center():
     # Callback Functions
     # /raw_obstacles Callback Function
     def raw_obstacles_callback(self, msg):
+        self.min_dist_obstacle = 10.0
         if msg.circles:
             min_dist = float('inf')
             for circle in msg.circles:
@@ -70,7 +71,7 @@ class Center():
             self.min_dist_obstacle = min_dist
         # else:
         #     self.min_dist_obstacle = 0.0
-        # rospy.loginfo(f'{self.min_dist_obstacle}')
+        rospy.loginfo(f'{self.min_dist_obstacle}')
 
     # /yolo Callback Function
     def yolo_callback(self, msg):
@@ -84,9 +85,9 @@ class Center():
         if msg.transforms:
             self.fiducial_id    = msg.transforms[0].fiducial_id
             self.fiducial_z     = msg.transforms[0].transform.translation.z
-        else:
-            self.fiducial_id    = -1
-            self.fiducial_z     = 0.0
+        # else:
+        #     self.fiducial_id    = -1
+        #     self.fiducial_z     = 0.0
         # rospy.loginfo(f'{self.fiducial_id}')
         # rospy.loginfo(f'{self.fiducial_z}')
 
@@ -100,10 +101,34 @@ class Center():
     # Process Function
     def process(self):
         temp = center_msgs()
-        if self.fiducial_id == 4 and self.fiducial_z < 1.0 or self.min_dist_obstacle < 1.0:
+        temp.is_payment = False
+
+        if self.drive_mode == DriveModeNum.FOLLOWING:
+            self.fiducial_id    = -1
+            self.fiducial_z     = 0.0
+            
+            if self.min_dist_obstacle < 1.0:
+                temp.drive_mode = DriveModeNum.STOP
+            else:
+                temp.drive_mode = DriveModeNum.FOLLOWING
+            # temp.drive_mode = DriveModeNum.FOLLOWING
+
+        elif self.drive_mode == DriveModeNum.STOP:
             temp.drive_mode = DriveModeNum.STOP
-        else:
-            temp.drive_mode = DriveModeNum.FOLLOWING
+
+        elif self.drive_mode == DriveModeNum.SEARCHING:
+            if self.fiducial_id == self.product_num and self.fiducial_z < 1.0 or self.min_dist_obstacle < 1.0:
+                temp.drive_mode = DriveModeNum.STOP
+            else:
+                temp.drive_mode = DriveModeNum.SEARCHING
+
+        elif self.drive_mode == DriveModeNum.PAYMENT:
+            if self.fiducial_id == 4 and self.fiducial_z < 1.0 or self.min_dist_obstacle < 1.0:
+                temp.drive_mode = DriveModeNum.STOP
+                temp.is_payment = True
+            else:
+                temp.drive_mode = DriveModeNum.FOLLOWING
+                
         self.center_pub.publish(temp)
 
 def run():

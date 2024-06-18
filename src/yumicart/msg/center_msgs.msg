@@ -1,1 +1,2 @@
 uint16 drive_mode
+bool is_payment
