@@ -15,7 +15,7 @@ from enums import DriveModeNum, ProductNum
 from yumicart.msg import ui_msgs
 
 # Subscriber msg Import
-from yumicart.msg import center_msgs
+from scale_car_yolov5.msg   import Objects, Yolo_Objects
 
 class Screen(IntEnum):
     MAIN = 0
@@ -45,6 +45,9 @@ class UI():
         # Publish Declaration
         ui_pub = rospy.Publisher('/ui', ui_msgs, queue_size=10)
 
+        rospy.Subscriber('/yolov5_pub', Yolo_Objects, self.yolo_callback)
+        self.products = []
+
         self.drive_mode = DriveModeNum.STOP
         temp_product_num = -1
         product_num = -1
@@ -69,6 +72,9 @@ class UI():
             image = pygame.image.load(image_path)
             images.append(image)
 
+        for i in range(Screen.CARTBU, Screen.CARTCHO+1):
+            images[i] = pygame.transform.scale(images[i], (911, 227)) # 3131 x 780
+
         clock = pygame.time.Clock()
         pygame_running = True
 
@@ -86,20 +92,20 @@ class UI():
                             screen_num = self.ScreenGoStop()
 
                     elif screen_num == Screen.EVENTS:
-                        # event1_rect = pygame.Rect()
-                        # event2_rect = pygame.Rect()
-                        # event3_rect = pygame.Rect()
-                        # event4_rect = pygame.Rect()
+                        event1_rect = pygame.Rect(69, 238, 1313, 189)
+                        event2_rect = pygame.Rect(69, 427, 1313, 189)
+                        event3_rect = pygame.Rect(69, 616, 1313, 189)
+                        event4_rect = pygame.Rect(69, 805, 1313, 189)
                         back_rect = pygame.Rect(1471, 772, 379, 221)
 
-                        # if event1_rect.collidepoint(pos):
-                        #     screen_num = Screen.EVENT1
-                        # if event2_rect.collidepoint(pos):
-                        #     screen_num = Screen.EVENT2
-                        # if event3_rect.collidepoint(pos):
-                        #     screen_num = Screen.EVENT3
-                        # if event4_rect.collidepoint(pos):
-                        #     screen_num = Screen.EVENT4
+                        if event1_rect.collidepoint(pos):
+                            screen_num = Screen.EVENT1
+                        if event2_rect.collidepoint(pos):
+                            screen_num = Screen.EVENT2
+                        if event3_rect.collidepoint(pos):
+                            screen_num = Screen.EVENT3
+                        if event4_rect.collidepoint(pos):
+                            screen_num = Screen.EVENT4
                         if back_rect.collidepoint(pos):
                             screen_num = self.ScreenGoStop()
 
@@ -107,25 +113,25 @@ class UI():
                         back_rect = pygame.Rect(1471, 772, 379, 221)
 
                         if back_rect.collidepoint(pos):
-                            screen_num = self.ScreenGoStop()
+                            screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT2:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
 
                         if back_rect.collidepoint(pos):
-                            screen_num = self.ScreenGoStop()
+                            screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT3:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
 
                         if back_rect.collidepoint(pos):
-                            screen_num = self.ScreenGoStop()
+                            screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT4:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
 
                         if back_rect.collidepoint(pos):
-                            screen_num = self.ScreenGoStop()
+                            screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.DIRECTIONS or\
                          screen_num == Screen.DIRECTIONBU or\
@@ -195,6 +201,10 @@ class UI():
 
             # 배경 이미지 그리기
             screen.blit(images[screen_num], (0, 0))
+            if screen_num == Screen.CHECKOUT:
+                for i, product in enumerate(self.products):
+                    screen.blit(images[i + 14], (101, 86 + i * 226))
+
             pygame.display.flip()
 
             # Int32 메시지 퍼블리시
@@ -217,6 +227,13 @@ class UI():
         else:
             return Screen.CARTSTOP
 
+    # /yolo Callback Function
+    def yolo_callback(self, msg):
+        self.products.clear()
+        for yolo_object in msg.yolo_objects:
+            self.products.append(yolo_object.c)
+        print(self.products)
+
 def run():
     rospy.init_node('ui_node')
     ui = UI()
@@ -226,3 +243,7 @@ if __name__ == '__main__':
         run()
     except rospy.ROSInterruptException:
         pass
+
+        rostopic pub /yolov5_pub scale_car_yolov5/Yolo_Objects "yolo_objects:
+- {c: 0, x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0}
+- {c: 1, x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0}" 
