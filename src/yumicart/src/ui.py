@@ -54,7 +54,7 @@ class UI():
 
         # Pygame 초기화
         pygame.init()
-        screen = pygame.display.set_mode((1920, 1080))#, pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
         pygame.display.set_caption("YUMI CART")
 
         screen_num = Screen.MAIN
@@ -175,7 +175,7 @@ class UI():
                             screen_num = self.ScreenGoStop()
                         if shopping_quit_rect.collidepoint(pos):
                             self.drive_mode = DriveModeNum.STOP
-                            pygame_running = False
+                            screen_num = Screen.MAIN
 
                     elif screen_num == Screen.CARTGO or\
                          screen_num == Screen.CARTSTOP:
@@ -203,7 +203,7 @@ class UI():
             screen.blit(images[screen_num], (0, 0))
             if screen_num == Screen.CHECKOUT:
                 for i, product in enumerate(self.products):
-                    screen.blit(images[i + 14], (101, 86 + i * 226))
+                    screen.blit(images[product + 14], (101, 86 + i * 226))
 
             pygame.display.flip()
 
@@ -243,7 +243,3 @@ if __name__ == '__main__':
         run()
     except rospy.ROSInterruptException:
         pass
-
-        rostopic pub /yolov5_pub scale_car_yolov5/Yolo_Objects "yolo_objects:
-- {c: 0, x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0}
-- {c: 1, x1: 0.0, x2: 0.0, y1: 0.0, y2: 0.0}" 

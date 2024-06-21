@@ -128,6 +128,7 @@ class Center():
                 temp.is_payment = True
             else:
                 temp.drive_mode = DriveModeNum.FOLLOWING
+                temp.is_payment = False
                 
         self.center_pub.publish(temp)
 

@@ -44,7 +44,7 @@ class YoloV5_ROS():
         self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
         self.imgsz = (160, 160)
 
-        self.conf_thres = 0.60
+        self.conf_thres = 0.30
         self.iou_thres = 0.45
         self.max_det = 10
         self.classes = None
@@ -75,7 +75,7 @@ class YoloV5_ROS():
 
             total_area = 0
 
-            cv2.namedWindow('result', cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+            # cv2.namedWindow('result', cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
             count += 1
 
             if count % 1 == 0:
@@ -127,8 +127,8 @@ class YoloV5_ROS():
                 print("car_count:", car_count)
                 print("total_area:", total_area)
 
-                cv2.imshow('result', im0s)
-                cv2.waitKey(1)
+                # cv2.imshow('result', im0s)
+                # cv2.waitKey(1)
 
 
 def run():
