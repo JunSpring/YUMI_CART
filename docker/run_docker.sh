@@ -7,5 +7,5 @@ docker run -it --rm \
   --privileged \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -v ~/YUMI_CART:/workspace/YUMI_CART \
+  -v ~/YUMI_CART:/workspace/yumicart_ws \
   junspring/yumi-cart:latest

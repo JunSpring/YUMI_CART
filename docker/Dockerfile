@@ -16,16 +16,30 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
+    build-essential \
+    python3-rosdep \
+    python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
     ros-noetic-ackermann-msgs \
     ros-noetic-vision-msgs \
     ros-noetic-serial \
     ros-noetic-joy \
  && rm -rf /var/lib/apt/lists/*
 
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+RUN pip3 install pygame
+
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/noetic/setup.bash" >> /root/.bashrc
 
-ENV CATKIN_WS=/workspace/YUMI_CART 
+ENV CATKIN_WS=/workspace/yumicart_ws 
 WORKDIR /workspace
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
