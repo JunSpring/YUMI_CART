@@ -10,8 +10,8 @@ WS_DIR=${CATKIN_WS:-/workspace/YUMI_CART}
 # 워크스페이스로 이동
 cd "$WS_DIR"
 
-# 기존 빌드 폴더 삭제
-sudo rm -rf build devel
+# # 기존 빌드 폴더 삭제
+# sudo rm -rf build devel
 
 # catkin_make 실행
 catkin_make

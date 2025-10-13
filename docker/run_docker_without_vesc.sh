@@ -5,7 +5,6 @@ docker run -it --rm \
   --net=host \
   --ipc=host \
   --privileged \
-  --device /dev/ttyACM1:/dev/ttyVesc \
   --device /dev/ttyUSB0:/dev/ttyRplidar \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \

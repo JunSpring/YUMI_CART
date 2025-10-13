@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     python3-rosdep \
     python3-pip \
+    v4l-utils \
+    libcanberra-gtk-module \
  && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
@@ -39,8 +41,8 @@ RUN pip3 install pygame
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/noetic/setup.bash" >> /root/.bashrc
 
-ENV CATKIN_WS=/workspace/yumicart_ws 
-WORKDIR /workspace
+ENV CATKIN_WS=/yumicart_ws
+WORKDIR /yumicart_ws
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
