@@ -1,5 +1,9 @@
 FROM osrf/ros:noetic-desktop-full
 
+ENV ROS_MASTER_URI=http://localhost:11311
+ENV ROS_HOSTNAME=localhost
+ENV SDL_AUDIODRIVER=dummy
+
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -13,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     locales \
     sudo \
     bash-completion \
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module \
  && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
@@ -34,9 +40,10 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-joy \
  && rm -rf /var/lib/apt/lists/*
 
-RUN ln -sf /usr/bin/python3 /usr/bin/python
-
-RUN pip3 install pygame
+RUN ln -sf /usr/bin/python3 /usr/bin/python && \
+    python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/ && \
+    pip install --no-cache-dir pygame pandas requests tqdm ultralytics seaborn
 
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/noetic/setup.bash" >> /root/.bashrc

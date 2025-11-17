@@ -1,20 +1,14 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-# Basic Import
 import rospy
-
 import pygame
 import os
 
-# Enum Import
-from enum import IntEnum  
+from enum import IntEnum
 from enums import DriveModeNum, ProductNum
 
-# Publisher msg Import
 from yumicart.msg import ui_msgs
-
-# Subscriber msg Import
 from scale_car_yolov5.msg   import Objects, Yolo_Objects
 
 class Screen(IntEnum):
@@ -39,12 +33,9 @@ class Screen(IntEnum):
 
 class UI():
     def __init__(self):
-        # ROS 초기화
         rospy.loginfo('UI is Created')
 
-        # Publish Declaration
         ui_pub = rospy.Publisher('/ui', ui_msgs, queue_size=10)
-
         rospy.Subscriber('/yolov5_pub', Yolo_Objects, self.yolo_callback)
         self.products = []
 
@@ -52,28 +43,43 @@ class UI():
         temp_product_num = -1
         product_num = -1
 
-        # Pygame 초기화
+        # -----------------------------
+        # Pygame 초기화 및 스케일 설정
+        # -----------------------------
         pygame.init()
-        screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)  # 실제 화면 해상도
+        screen_w, screen_h = screen.get_size()
+
+        # 내부 렌더링 해상도(에셋 기준 해상도 = 1920x1080)
+        base_w, base_h = 1920, 1080
+        base_surface = pygame.Surface((base_w, base_h))
+
+        # 화면 스케일 비율 (가로/세로 각각 별도로 스트레치)
+        scale_x = float(screen_w) / float(base_w)
+        scale_y = float(screen_h) / float(base_h)
+
         pygame.display.set_caption("YUMI CART")
 
         screen_num = Screen.MAIN
-        images_name = [ 'main.png', 'events.png', 'event1.png', 'event2.png', 'event3.png', 'event4.png',
-                        'directions.png', 'direction_bu.png', 'direction_cham.png', 'direction_ho.png', 'direction_cho.png',
-                        'check_out.png',
-                        'cart_go.png', 'cart_stop.png',
-                        'cart_bu.png', 'cart_cham.png', 'cart_ho.png', 'cart_cho.png']
+        images_name = [
+            'main.png', 'events.png', 'event1.png', 'event2.png', 'event3.png', 'event4.png',
+            'directions.png', 'direction_bu.png', 'direction_cham.png', 'direction_ho.png', 'direction_cho.png',
+            'check_out.png',
+            'cart_go.png', 'cart_stop.png',
+            'cart_bu.png', 'cart_cham.png', 'cart_ho.png', 'cart_cho.png'
+        ]
         images = []
 
-        # 배경 이미지 로드
+        # 배경 이미지 로드 (1920x1080 기준)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         for i in range(18):
             image_path = os.path.join(current_dir, f'../images/{images_name[i]}')
-            image = pygame.image.load(image_path)
-            images.append(image)
+            img = pygame.image.load(image_path).convert()
+            images.append(img)
 
+        # 장바구니 미리보기(체크아웃 리스트용) 소형 이미지만 기존처럼 리스케일
         for i in range(Screen.CARTBU, Screen.CARTCHO+1):
-            images[i] = pygame.transform.scale(images[i], (911, 227)) # 3131 x 780
+            images[i] = pygame.transform.scale(images[i], (911, 227))  # 3131x780 → 911x227로 표시
 
         clock = pygame.time.Clock()
         pygame_running = True
@@ -81,13 +87,18 @@ class UI():
         while not rospy.is_shutdown() and pygame_running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame_running = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    pygame_running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    pos = pygame.mouse.get_pos()
+                    # 실제 화면 좌표 → 내부(1920x1080) 좌표로 역변환
+                    mx, my = pygame.mouse.get_pos()
+                    bx = int(mx / scale_x)
+                    by = int(my / scale_y)
+                    pos = (bx, by)
 
                     if screen_num == Screen.MAIN:
                         shopping_start_rect = pygame.Rect(1306, 766, 519, 222)
-
                         if shopping_start_rect.collidepoint(pos):
                             screen_num = self.ScreenGoStop()
 
@@ -96,71 +107,63 @@ class UI():
                         event2_rect = pygame.Rect(69, 427, 1313, 189)
                         event3_rect = pygame.Rect(69, 616, 1313, 189)
                         event4_rect = pygame.Rect(69, 805, 1313, 189)
-                        back_rect = pygame.Rect(1471, 772, 379, 221)
+                        back_rect  = pygame.Rect(1471, 772, 379, 221)
 
                         if event1_rect.collidepoint(pos):
                             screen_num = Screen.EVENT1
-                        if event2_rect.collidepoint(pos):
+                        elif event2_rect.collidepoint(pos):
                             screen_num = Screen.EVENT2
-                        if event3_rect.collidepoint(pos):
+                        elif event3_rect.collidepoint(pos):
                             screen_num = Screen.EVENT3
-                        if event4_rect.collidepoint(pos):
+                        elif event4_rect.collidepoint(pos):
                             screen_num = Screen.EVENT4
-                        if back_rect.collidepoint(pos):
+                        elif back_rect.collidepoint(pos):
                             screen_num = self.ScreenGoStop()
 
                     elif screen_num == Screen.EVENT1:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
-
                         if back_rect.collidepoint(pos):
                             screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT2:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
-
                         if back_rect.collidepoint(pos):
                             screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT3:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
-
                         if back_rect.collidepoint(pos):
                             screen_num = Screen.EVENTS
 
                     elif screen_num == Screen.EVENT4:
                         back_rect = pygame.Rect(1471, 772, 379, 221)
-
                         if back_rect.collidepoint(pos):
                             screen_num = Screen.EVENTS
 
-                    elif screen_num == Screen.DIRECTIONS or\
-                         screen_num == Screen.DIRECTIONBU or\
-                         screen_num == Screen.DIRECTIONCHAM or\
-                         screen_num == Screen.DIRECTIONHO or\
-                         screen_num == Screen.DIRECTIONCHO:
-                        cham_rect = pygame.Rect(65, 84, 399, 462)
-                        bu_rect = pygame.Rect(526, 84, 399, 462)
-                        ho_rect = pygame.Rect(988, 84, 399, 462)
-                        cho_rect = pygame.Rect(1450, 84, 399, 462)
-                        navi_start = pygame.Rect(116, 722, 799, 275)
-                        navi_stop = pygame.Rect(988, 722, 799, 275)
+                    elif screen_num in (Screen.DIRECTIONS, Screen.DIRECTIONBU, Screen.DIRECTIONCHAM, Screen.DIRECTIONHO, Screen.DIRECTIONCHO):
+                        cham_rect   = pygame.Rect(65, 84, 399, 462)
+                        bu_rect     = pygame.Rect(526, 84, 399, 462)
+                        ho_rect     = pygame.Rect(988, 84, 399, 462)
+                        cho_rect    = pygame.Rect(1450, 84, 399, 462)
+                        navi_start  = pygame.Rect(116, 722, 799, 275)
+                        navi_stop   = pygame.Rect(988, 722, 799, 275)
 
                         if cham_rect.collidepoint(pos):
                             temp_product_num = ProductNum.CHAMKKAERAMEN
                             screen_num = Screen.DIRECTIONCHAM
-                        if bu_rect.collidepoint(pos):
+                        elif bu_rect.collidepoint(pos):
                             temp_product_num = ProductNum.BRAVO
                             screen_num = Screen.DIRECTIONBU
-                        if ho_rect.collidepoint(pos):
+                        elif ho_rect.collidepoint(pos):
                             temp_product_num = ProductNum.CHAPSSALHOTTEONGMIX
                             screen_num = Screen.DIRECTIONHO
-                        if cho_rect.collidepoint(pos):
+                        elif cho_rect.collidepoint(pos):
                             temp_product_num = ProductNum.CHOCOBI
                             screen_num = Screen.DIRECTIONCHO
-                        if navi_start.collidepoint(pos):
+                        elif navi_start.collidepoint(pos):
                             product_num = temp_product_num
                             self.drive_mode = DriveModeNum.SEARCHING
-                        if navi_stop.collidepoint(pos):
+                        elif navi_stop.collidepoint(pos):
                             temp_product_num = -1
                             product_num = -1
                             self.drive_mode = DriveModeNum.STOP
@@ -173,25 +176,24 @@ class UI():
                         if back_rect.collidepoint(pos):
                             self.drive_mode = DriveModeNum.STOP
                             screen_num = self.ScreenGoStop()
-                        if shopping_quit_rect.collidepoint(pos):
+                        elif shopping_quit_rect.collidepoint(pos):
                             self.drive_mode = DriveModeNum.STOP
                             screen_num = Screen.MAIN
 
-                    elif screen_num == Screen.CARTGO or\
-                         screen_num == Screen.CARTSTOP:
+                    elif screen_num in (Screen.CARTGO, Screen.CARTSTOP):
                         directions_rect = pygame.Rect(860, 137, 977, 252)
-                        checkout_rect = pygame.Rect(860, 458, 977, 252)
-                        events_rect = pygame.Rect(860, 779, 455, 252)
-                        stop_go_rect = pygame.Rect(1382, 779, 455, 252 )
+                        checkout_rect   = pygame.Rect(860, 458, 977, 252)
+                        events_rect     = pygame.Rect(860, 779, 455, 252)
+                        stop_go_rect    = pygame.Rect(1382, 779, 455, 252)
 
                         if directions_rect.collidepoint(pos):
                             screen_num = Screen.DIRECTIONS
-                        if checkout_rect.collidepoint(pos):
+                        elif checkout_rect.collidepoint(pos):
                             self.drive_mode = DriveModeNum.PAYMENT
                             screen_num = Screen.CHECKOUT
-                        if events_rect.collidepoint(pos):
+                        elif events_rect.collidepoint(pos):
                             screen_num = Screen.EVENTS
-                        if stop_go_rect.collidepoint(pos):
+                        elif stop_go_rect.collidepoint(pos):
                             if self.drive_mode == DriveModeNum.FOLLOWING:
                                 self.drive_mode = DriveModeNum.STOP
                                 screen_num = Screen.CARTSTOP
@@ -199,24 +201,29 @@ class UI():
                                 self.drive_mode = DriveModeNum.FOLLOWING
                                 screen_num = Screen.CARTGO
 
-            # 배경 이미지 그리기
-            screen.blit(images[screen_num], (0, 0))
+            # -----------------------------
+            # 그리기: 내부 Surface(1920x1080)에 모두 그림
+            # -----------------------------
+            base_surface.blit(images[screen_num], (0, 0))
             if screen_num == Screen.CHECKOUT:
                 for i, product in enumerate(self.products):
-                    screen.blit(images[product + 14], (101, 86 + i * 226))
+                    base_surface.blit(images[product + 14], (101, 86 + i * 226))
 
+            # -----------------------------
+            # 화면으로 스트레치 출력
+            # -----------------------------
+            scaled = pygame.transform.smoothscale(base_surface, (screen_w, screen_h))
+            screen.blit(scaled, (0, 0))
             pygame.display.flip()
 
-            # Int32 메시지 퍼블리시
+            # ROS 메시지 퍼블리시
             temp_ui_msgs = ui_msgs()
             temp_ui_msgs.drive_mode = self.drive_mode
             temp_ui_msgs.product_number = product_num
             ui_pub.publish(temp_ui_msgs)
 
-            # 주기적으로 ROS 콜백 함수들을 호출
-            rospy.rostime.wallsleep(0.01)  # 10ms 대기
-
-            # Pygame의 프레임 속도 설정 (예: 초당 30프레임)
+            # 콜백 처리 및 FPS
+            rospy.rostime.wallsleep(0.01)
             clock.tick(30)
 
         pygame.quit()
@@ -227,9 +234,8 @@ class UI():
         else:
             return Screen.CARTSTOP
 
-    # /yolo Callback Function
     def yolo_callback(self, msg):
-        self.products.clear()
+        self.products.clear        ()
         for yolo_object in msg.yolo_objects:
             self.products.append(yolo_object.c)
         print(self.products)

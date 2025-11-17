@@ -1,0 +1,20 @@
+<launch>
+    <!-- wego -->
+    <include file="$(find wego)/launch/teleop.launch" />
+    <include file="$(find wego)/launch/view_sensors.launch" />
+
+    <group ns="camera2/usb_cam2">
+        <node pkg="image_proc" type="image_proc" name="image_proc" output="screen" />
+    </group>
+
+    <include file="$(find aruco_detect)/launch/aruco_detect.launch" />
+    <!-- <include file="$(find lane_detection)/launch/ld_start.launch" /> -->
+    <!-- <include file="$(find obstacle_detector)/launch/yumicart.launch" /> -->
+    <include file="$(find scale_car_yolov5)/launch/test_torch.launch" />
+    
+    <!-- yumicart -->
+    <node pkg="yumicart" type="center.py" name="yumicart_center" output="screen" respawn="true"/>
+    <node pkg="yumicart" type="control.py" name="yumicart_control" output="screen" respawn="true"/>
+    <node pkg="yumicart" type="ui.py" name="yumicart_ui" output="screen" respawn="true"/>
+    <node pkg="yumicart" type="point_cloud.py" name="yumicart_point_cloud" output="screen" respawn="true"/>
+</launch>

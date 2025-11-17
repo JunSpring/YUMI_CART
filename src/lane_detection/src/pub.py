@@ -71,10 +71,10 @@ class CameraReceiver():
         msg.ydetected = avey
         self.pub.publish(msg)
 
-        cv2.imshow("warp", warp_img)
-        cv2.imshow("lane", lane_img)
+        # cv2.imshow("warp", warp_img)
+        # cv2.imshow("lane", lane_img)
 
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
 
 def calibrate_image(frame):
     global Width, Height
@@ -108,9 +108,9 @@ def warp_process_image(img):
 
     lane = cv2.inRange(hsv, lower_white, upper_white)
 
-    cv2.imshow("W", lane)
+    # cv2.imshow("W", lane)
    
-    cv2.waitKey(1)
+    # cv2.waitKey(1)
 
     histogram = np.sum(lane[lane.shape[0]//2:,:], axis=0) 
     midpoint = np.int(histogram.shape[0]/2) 

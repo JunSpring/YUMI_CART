@@ -1,5 +1,5 @@
 <!-- -*- mode: XML -*- -->
 <launch>
-  <node pkg="rviz" name="rviz" type="rviz" args="-d $(find wego)/rviz/view_sensors.rviz"/>
+  <node pkg="rviz" name="rviz" type="rviz" args="-d $(find wego)/rviz/yumicart.rviz"/>
 
 </launch>
